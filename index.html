@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recuadros IG</title>
+<style>
+:root{
+  --bg:#0e0e11;--panel:#17171c;--panel2:#1f1f26;--line:#2b2b34;
+  --text:#ececf1;--muted:#9898a6;--accent:#e1306c;--accent2:#833ab4;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:grid;grid-template-columns:270px 1fr 330px;overflow:hidden}
+aside{background:var(--panel);overflow-y:auto;padding:14px;border-color:var(--line);border-style:solid;border-width:0}
+aside.left{border-right-width:1px}
+aside.right{border-left-width:1px}
+h1{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+h1 .logo{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#833ab4,#e1306c,#f77737)}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px}
+h3{font-size:12px;margin:18px 0 8px;padding-top:12px;border-top:1px solid var(--line);color:#fff}
+h3:first-child{border-top:0;padding-top:0;margin-top:0}
+button,.btn{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover,.btn:hover{border-color:#44444f;background:#26262e}
+button.primary{background:linear-gradient(135deg,var(--accent2),var(--accent));border:0;font-weight:600}
+button.primary:hover{filter:brightness(1.1)}
+button.danger:hover{border-color:#a33;color:#ff8080}
+button:disabled{opacity:.45;cursor:not-allowed}
+.full{width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+input[type=file]{display:none}
+.drop{border:1.5px dashed #3a3a45;border-radius:10px;padding:14px;text-align:center;color:var(--muted);cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--accent);color:var(--text)}
+.drop b{color:var(--text);display:block;margin-bottom:2px;word-break:break-all}
+.list{display:flex;flex-direction:column;gap:6px}
+.item{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+.item.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.item small{color:var(--muted);display:block;font-size:11px}
+.item .txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{color:var(--muted);font-size:12px}
+.hint{color:var(--muted);font-size:11.5px;margin-top:8px}
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px;position:relative}
+canvas{display:block;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5);touch-action:none;background:#000}
+.transport{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line);background:var(--panel)}
+.transport input[type=range]{flex:1}
+.time{font-variant-numeric:tabular-nums;color:var(--muted);min-width:96px;text-align:right}
+.row{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:8px;margin:7px 0}
+.row.col{grid-template-columns:1fr}
+.row.col span{color:var(--muted)}
+.row>span{color:var(--muted)}
+.row output{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;font-size:12px}
+.row.chk{grid-template-columns:auto 1fr;cursor:pointer}
+.row.chk span{color:var(--text)}
+.row.color{grid-template-columns:110px 1fr}
+.row.sel2{grid-template-columns:110px 1fr}
+.row.time2{grid-template-columns:110px 1fr auto}
+input[type=text],input[type=number],textarea,select{width:100%;font:inherit;color:var(--text);background:var(--bg);
+  border:1px solid var(--line);border-radius:7px;padding:7px 8px}
+textarea{resize:vertical;min-height:62px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+input[type=range]{accent-color:var(--accent);width:100%}
+input[type=color]{width:100%;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--bg);padding:2px;cursor:pointer}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.noSel{color:var(--muted);text-align:center;padding:40px 10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:10}
+.modal.show{display:flex}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;width:min(380px,90vw)}
+.card h4{margin:0 0 6px;font-size:16px}
+.bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:14px 0 8px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+.muted{color:var(--muted)}
+kbd{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:11px}
+@media (max-width:900px){
+  body{grid-template-columns:1fr;overflow:auto;height:auto}
+  aside{border-width:0 0 1px 0 !important}
+  main{order:-1}
+  .stage{height:70vh}
+}
+</style>
+</head>
+<body>
+
+<aside class="left">
+  <h1><span class="logo"></span>Recuadros IG</h1>
+
+  <h2>Video</h2>
+  <label class="drop" id="drop">
+    <b id="vname">Subí tu video</b>
+    Hacé clic o arrastralo acá
+    <input type="file" id="file" accept="video/*">
+  </label>
+
+  <h2>Recuadros</h2>
+  <button class="primary full" id="add">+ Agregar recuadro</button>
+  <div class="list" id="list" style="margin-top:8px"></div>
+
+  <h2>Exportar</h2>
+  <button class="primary full" id="export">Exportar video con recuadros</button>
+  <div style="height:6px"></div>
+  <button class="full" id="png">Descargar PNG transparente</button>
+  <p class="hint">El video se graba en tiempo real (tarda lo mismo que dura). No cambies de pestaña mientras exporta.</p>
+  <p class="hint">Atajos: arrastrá el recuadro para moverlo, las esquinas para cambiar el ancho. <kbd>←↑→↓</kbd> mueve fino (<kbd>Shift</kbd> más rápido), <kbd>Supr</kbd> borra, <kbd>Espacio</kbd> play/pausa.</p>
+</aside>
+
+<main>
+  <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+  <div class="transport">
+    <button id="play" title="Play / pausa">▶</button>
+    <input type="range" id="scrub" min="0" max="0" step="0.01" value="0">
+    <span class="time" id="time">0:00.0 / 0:00.0</span>
+  </div>
+</main>
+
+<aside class="right">
+  <div id="noSel" class="noSel">Seleccioná o agregá un recuadro para editarlo.</div>
+  <div id="propsWrap" style="display:none">
+    <div id="props"></div>
+    <h3>Acciones</h3>
+    <div class="actions">
+      <button id="dup">Duplicar</button>
+      <button id="del" class="danger">Eliminar</button>
+      <button id="styleAll">Estilo a todos</button>
+      <button id="reset">Estilo Instagram</button>
+      <button id="front">Traer al frente</button>
+      <button id="center">Centrar</button>
+    </div>
+  </div>
+</aside>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <h4>Exportando video…</h4>
+    <div class="muted" id="expInfo">Preparando</div>
+    <div class="bar"><i id="expBar"></i></div>
+    <div class="muted" id="expPct" style="font-size:12px">0%</div>
+    <div style="margin-top:14px;text-align:right"><button id="cancel">Cancelar</button></div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const canvas = $('#cv'), ctx = canvas.getContext('2d');
+const video = document.createElement('video');
+video.playsInline = true; video.preload = 'auto';
+
+const FONTS = {
+  helvetica: '"Helvetica Neue", Helvetica, -apple-system, "Segoe UI", Arial, sans-serif',
+  arial: 'Arial, sans-serif',
+  segoe: '"Segoe UI", sans-serif',
+  georgia: 'Georgia, serif',
+  mono: '"Courier New", monospace',
+  impact: 'Impact, "Arial Black", sans-serif'
+};
+
+// Las medidas de estilo están en "unidades" de un recuadro de 600 de ancho,
+// así se mantienen proporcionales cuando cambia el ancho o la resolución del video.
+const IG_STYLE = {
+  radius: 22, opacity: 100, shadow: false,
+  qBg: '#262626', qColor: '#ffffff', qSize: 28, qPad: 34, qBold: true,
+  aBg: '#ffffff', aColor: '#111111', aSize: 42, aPadX: 40, aPadY: 50, lineHeight: 1.2,
+  aAlign: 'center', aBold: false, font: 'helvetica', anim: true
+};
+const STYLE_KEYS = Object.keys(IG_STYLE);
+
+const FIELDS = [
+  {section: 'Texto'},
+  {k: 'question', label: 'Pregunta (encabezado)', type: 'text'},
+  {k: 'answer', label: 'Respuesta', type: 'textarea'},
+  {section: 'Posición y tamaño'},
+  {k: 'x', label: 'Posición X', type: 'range', min: 0, max: 100, step: 0.1, unit: '%'},
+  {k: 'y', label: 'Posición Y', type: 'range', min: 0, max: 100, step: 0.1, unit: '%'},
+  {k: 'width', label: 'Ancho', type: 'range', min: 15, max: 100, step: 0.5, unit: '%'},
+  {k: 'rotation', label: 'Rotación', type: 'range', min: -30, max: 30, step: 0.5, unit: '°'},
+  {k: 'radius', label: 'Bordes', type: 'range', min: 0, max: 80, step: 1},
+  {k: 'opacity', label: 'Opacidad', type: 'range', min: 10, max: 100, step: 1, unit: '%'},
+  {k: 'shadow', label: 'Sombra', type: 'check'},
+  {section: 'Recuadro de la pregunta'},
+  {k: 'qBg', label: 'Fondo', type: 'color'},
+  {k: 'qColor', label: 'Color de texto', type: 'color'},
+  {k: 'qSize', label: 'Tamaño de letra', type: 'range', min: 12, max: 90, step: 1},
+  {k: 'qPad', label: 'Alto (relleno)', type: 'range', min: 0, max: 80, step: 1},
+  {k: 'qBold', label: 'Negrita', type: 'check'},
+  {section: 'Recuadro de la respuesta'},
+  {k: 'aBg', label: 'Fondo', type: 'color'},
+  {k: 'aColor', label: 'Color de texto', type: 'color'},
+  {k: 'aSize', label: 'Tamaño de letra', type: 'range', min: 16, max: 120, step: 1},
+  {k: 'aPadX', label: 'Margen lateral', type: 'range', min: 0, max: 120, step: 1},
+  {k: 'aPadY', label: 'Margen vertical', type: 'range', min: 0, max: 120, step: 1},
+  {k: 'lineHeight', label: 'Interlineado', type: 'range', min: 0.9, max: 2, step: 0.05},
+  {k: 'aAlign', label: 'Alineación', type: 'select', options: [['center', 'Centro'], ['left', 'Izquierda'], ['right', 'Derecha']]},
+  {k: 'aBold', label: 'Negrita', type: 'check'},
+  {section: 'Tipografía'},
+  {k: 'font', label: 'Fuente', type: 'select', options: [['helvetica', 'Instagram (Helvetica)'], ['arial', 'Arial'], ['segoe', 'Segoe UI'], ['georgia', 'Georgia'], ['mono', 'Courier'], ['impact', 'Impact']]},
+  {section: 'Cuándo aparece'},
+  {k: 'start', label: 'Desde (seg)', type: 'time', ph: '0'},
+  {k: 'end', label: 'Hasta (seg)', type: 'time', ph: 'hasta el final'},
+  {k: 'anim', label: 'Animación de entrada (pop)', type: 'check'}
+];
+
+let W = 1080, H = 1920, hasVideo = false, videoName = 'video';
+let stickers = [], selId = null, exporting = false, boxes = [], drag = null, guides = {v: false, h: false};
+let nextId = 1;
+
+// ---------- persistencia ----------
+function save() {
+  try { localStorage.setItem('igRecuadros_v1', JSON.stringify(stickers)); } catch (e) {}
+}
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem('igRecuadros_v1') || 'null');
+    if (Array.isArray(d) && d.length) {
+      stickers = d.map(s => ({...IG_STYLE, ...s}));
+      nextId = Math.max(...stickers.map(s => s.id)) + 1;
+      return;
+    }
+  } catch (e) {}
+  // Ejemplo inicial igual a la referencia
+  addSticker({question: 'Tutorial', answer: 'Coloca la respuesta, y\ndescarga la historia', x: 44, y: 18, width: 78}, false);
+  addSticker({question: 'Tutorial', answer: 'Selecciona otra respuesta y coloca la anterior como imagen', x: 59, y: 39, width: 76}, false);
+  addSticker({question: 'Tutorial', answer: 'Hace una y otra vez\nlo mismo', x: 41, y: 60, width: 76}, false);
+  selId = null;
+}
+
+function newSticker(over = {}) {
+  const base = sel() ? pick(sel(), STYLE_KEYS) : {...IG_STYLE};
+  return {id: nextId++, question: 'Pregunta', answer: 'Escribí tu respuesta acá', x: 50, y: 35, width: 78, rotation: 0,
+    start: 0, end: '', ...base, ...over};
+}
+function addSticker(over, select = true) {
+  const st = newSticker(over);
+  stickers.push(st);
+  if (select) selectSticker(st.id); else selId = st.id;
+  renderList(); save();
+  return st;
+}
+const pick = (o, keys) => Object.fromEntries(keys.map(k => [k, o[k]]));
+const sel = () => stickers.find(s => s.id === selId);
+
+// ---------- dibujo ----------
+function fontStr(weight, size, fam) { return `${weight} ${size}px ${FONTS[fam] || FONTS.helvetica}`; }
+
+function wrap(c, text, maxW) {
+  const out = [];
+  for (const para of String(text).split('\n')) {
+    const words = para.split(/\s+/).filter(Boolean);
+    if (!words.length) { out.push(''); continue; }
+    let line = words[0];
+    for (let i = 1; i < words.length; i++) {
+      const test = line + ' ' + words[i];
+      if (c.measureText(test).width <= maxW) line = test;
+      else { out.push(line); line = words[i]; }
+    }
+    out.push(line);
+  }
+  return out;
+}
+
+function roundPath(c, x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function drawSticker(c, st, CW, CH, anim = 1) {
+  const w = st.width / 100 * CW, s = w / 600;
+  const hasQ = String(st.question).trim() !== '';
+  const qf = st.qSize * s, af = st.aSize * s;
+  const qH = hasQ ? qf + st.qPad * s * 2 : 0;
+  const padX = st.aPadX * s, padY = st.aPadY * s;
+  c.font = fontStr(st.aBold ? 700 : 400, af, st.font);
+  const lines = wrap(c, st.answer, w - padX * 2);
+  const lh = af * st.lineHeight;
+  const aH = lines.length * lh + padY * 2;
+  const h = qH + aH;
+  const cx = st.x / 100 * CW, cy = st.y / 100 * CH;
+
+  c.save();
+  c.translate(cx, cy);
+  c.rotate(st.rotation * Math.PI / 180);
+  const k = anim;
+  const sc = k >= 1 ? 1 : 0.6 + 0.4 * easeOutBack(k);
+  c.scale(sc, sc);
+  c.globalAlpha = (st.opacity / 100) * Math.min(1, k * 1.6);
+  const x = -w / 2, y = -h / 2, r = st.radius * s;
+
+  if (st.shadow) {
+    c.save();
+    c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 40 * s; c.shadowOffsetY = 10 * s;
+    roundPath(c, x, y, w, h, r); c.fillStyle = st.aBg; c.fill();
+    c.restore();
+  }
+  c.save();
+  roundPath(c, x, y, w, h, r); c.clip();
+  c.fillStyle = st.aBg; c.fillRect(x, y, w, h);
+  if (hasQ) { c.fillStyle = st.qBg; c.fillRect(x, y, w, qH); }
+  c.restore();
+
+  c.textBaseline = 'middle';
+  if (hasQ) {
+    c.font = fontStr(st.qBold ? 600 : 400, qf, st.font);
+    c.fillStyle = st.qColor; c.textAlign = 'center';
+    c.fillText(st.question, 0, y + qH / 2, w - padX);
+  }
+  c.font = fontStr(st.aBold ? 700 : 400, af, st.font);
+  c.fillStyle = st.aColor; c.textAlign = st.aAlign;
+  const tx = st.aAlign === 'left' ? x + padX : st.aAlign === 'right' ? x + w - padX : 0;
+  lines.forEach((ln, i) => c.fillText(ln, tx, y + qH + padY + lh * i + lh / 2));
+  c.restore();
+  return {cx, cy, w: w * sc, h: h * sc, rot: st.rotation};
+}
+
+const easeOutBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+
+function endOf(st) { return st.end === '' || st.end == null ? Infinity : Number(st.end); }
+function isVisible(st, t) { return t >= (Number(st.start) || 0) - 0.001 && t <= endOf(st); }
+function animK(st, t) { return st.anim ? Math.max(0, Math.min(1, (t - (Number(st.start) || 0)) / 0.3)) : 1; }
+
+function drawPlaceholder() {
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, '#c20fe6'); g.addColorStop(0.5, '#ec3d6f'); g.addColorStop(1, '#f58a1a');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = fontStr(500, W * 0.032, 'helvetica');
+  ctx.fillText('Vista previa — subí un video para empezar', W / 2, H * 0.93);
+}
+
+function dispScale() { return canvas.getBoundingClientRect().width / W || 1; }
+
+function drawSelection() {
+  const b = boxes.find(b => b.st.id === selId);
+  const ds = dispScale();
+  if (drag && drag.mode === 'move') {
+    ctx.save(); ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 1.5 / ds; ctx.setLineDash([8 / ds, 6 / ds]);
+    if (guides.v) { ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke(); }
+    if (guides.h) { ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke(); }
+    ctx.restore();
+  }
+  if (!b) return;
+  ctx.save();
+  ctx.translate(b.cx, b.cy); ctx.rotate(b.rot * Math.PI / 180);
+  const pad = 4 / ds;
+  ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 2 / ds; ctx.setLineDash([7 / ds, 5 / ds]);
+  ctx.strokeRect(-b.w / 2 - pad, -b.h / 2 - pad, b.w + pad * 2, b.h + pad * 2);
+  ctx.setLineDash([]);
+  const hs = 11 / ds;
+  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#00b8d4';
+    ctx.fillRect(sx * (b.w / 2 + pad) - hs / 2, sy * (b.h / 2 + pad) - hs / 2, hs, hs);
+    ctx.strokeRect(sx * (b.w / 2 + pad) - hs / 2, sy * (b.h / 2 + pad) - hs / 2, hs, hs);
+  }
+  ctx.restore();
+}
+
+function render() {
+  const t = video.currentTime || 0;
+  if (hasVideo) {
+    if (video.readyState >= 2) ctx.drawImage(video, 0, 0, W, H);
+    else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); }
+  } else drawPlaceholder();
+  boxes = [];
+  for (const st of stickers) {
+    if (hasVideo && !isVisible(st, t)) continue;
+    boxes.push({st, ...drawSticker(ctx, st, W, H, hasVideo ? animK(st, t) : 1)});
+  }
+  if (!exporting) drawSelection();
+  updateTransport();
+  requestAnimationFrame(render);
+}
+
+// ---------- tamaño del canvas ----------
+function setCanvasSize(w, h) {
+  const maxSide = 1920, k = Math.min(1, maxSide / Math.max(w, h));
+  W = Math.round(w * k / 2) * 2; H = Math.round(h * k / 2) * 2;
+  canvas.width = W; canvas.height = H;
+  fitCanvas();
+}
+function fitCanvas() {
+  const st = $('#stage'), r = st.getBoundingClientRect();
+  const aw = r.width - 32, ah = r.height - 32;
+  const k = Math.min(aw / W, ah / H);
+  canvas.style.width = Math.floor(W * k) + 'px';
+  canvas.style.height = Math.floor(H * k) + 'px';
+}
+new ResizeObserver(fitCanvas).observe($('#stage'));
+
+// ---------- video ----------
+function loadFile(f) {
+  if (!f || !f.type.startsWith('video')) return alert('Elegí un archivo de video.');
+  videoName = f.name.replace(/\.[^.]+$/, '');
+  $('#vname').textContent = f.name;
+  if (video.src) URL.revokeObjectURL(video.src);
+  video.src = URL.createObjectURL(f);
+  video.load();
+}
+video.addEventListener('loadedmetadata', () => {
+  hasVideo = true;
+  setCanvasSize(video.videoWidth, video.videoHeight);
+  $('#scrub').max = video.duration;
+  video.currentTime = 0.01;
+});
+video.addEventListener('ended', () => { $('#play').textContent = '▶'; });
+$('#file').addEventListener('change', e => loadFile(e.target.files[0]));
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+document.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
+
+// Audio: se rutea por WebAudio para poder grabarlo junto con el canvas al exportar.
+let actx = null, audioDest = null;
+function ensureAudio() {
+  if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+  try {
+    actx = new AudioContext();
+    const src = actx.createMediaElementSource(video);
+    audioDest = actx.createMediaStreamDestination();
+    src.connect(actx.destination); src.connect(audioDest);
+  } catch (e) { console.warn('Sin audio', e); }
+}
+
+function togglePlay() {
+  if (!hasVideo || exporting) return;
+  ensureAudio();
+  if (video.paused) { if (video.ended) video.currentTime = 0; video.play(); $('#play').textContent = '❚❚'; }
+  else { video.pause(); $('#play').textContent = '▶'; }
+}
+$('#play').addEventListener('click', togglePlay);
+$('#scrub').addEventListener('input', e => { video.currentTime = Number(e.target.value); });
+
+const fmt = t => { t = t || 0; const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); };
+let lastT = -1;
+function updateTransport() {
+  const t = video.currentTime || 0;
+  if (t === lastT) return; lastT = t;
+  $('#scrub').value = t;
+  $('#time').textContent = fmt(t) + ' / ' + fmt(video.duration);
+}
+
+// ---------- interacción con el canvas ----------
+function toCanvas(e) {
+  const r = canvas.getBoundingClientRect();
+  return {x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H};
+}
+function toLocal(b, p) {
+  const dx = p.x - b.cx, dy = p.y - b.cy, a = -b.rot * Math.PI / 180;
+  return {x: dx * Math.cos(a) - dy * Math.sin(a), y: dx * Math.sin(a) + dy * Math.cos(a)};
+}
+function onHandle(b, p) {
+  const l = toLocal(b, p), tol = 14 / dispScale();
+  return Math.abs(Math.abs(l.x) - b.w / 2) < tol && Math.abs(Math.abs(l.y) - b.h / 2) < tol;
+}
+function hit(p) {
+  for (let i = boxes.length - 1; i >= 0; i--) {
+    const b = boxes[i], l = toLocal(b, p);
+    if (Math.abs(l.x) <= b.w / 2 && Math.abs(l.y) <= b.h / 2) return b;
+  }
+  return null;
+}
+canvas.addEventListener('pointerdown', e => {
+  if (exporting) return;
+  const p = toCanvas(e);
+  const sb = boxes.find(b => b.st.id === selId);
+  if (sb && onHandle(sb, p)) drag = {mode: 'resize', st: sb.st};
+  else {
+    const b = hit(p);
+    if (b) { selectSticker(b.st.id); drag = {mode: 'move', st: b.st, ox: p.x - b.cx, oy: p.y - b.cy}; }
+    else selectSticker(null);
+  }
+  if (drag) canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', e => {
+  const p = toCanvas(e);
+  if (!drag) {
+    const sb = boxes.find(b => b.st.id === selId);
+    canvas.style.cursor = sb && onHandle(sb, p) ? 'nwse-resize' : hit(p) ? 'move' : 'default';
+    return;
+  }
+  const st = drag.st;
+  if (drag.mode === 'move') {
+    let cx = p.x - drag.ox, cy = p.y - drag.oy;
+    const thr = 8 / dispScale();
+    guides.v = Math.abs(cx - W / 2) < thr; if (guides.v) cx = W / 2;
+    guides.h = Math.abs(cy - H / 2) < thr; if (guides.h) cy = H / 2;
+    st.x = +(cx / W * 100).toFixed(2); st.y = +(cy / H * 100).toFixed(2);
+    syncFields(['x', 'y']);
+  } else {
+    const b = boxes.find(b => b.st.id === st.id);
+    if (!b) return;
+    const l = toLocal(b, p);
+    st.width = +Math.max(15, Math.min(100, 2 * Math.abs(l.x) / W * 100)).toFixed(1);
+    syncFields(['width']);
+  }
+});
+const endDrag = () => { if (drag) { drag = null; guides = {v: false, h: false}; save(); } };
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+
+document.addEventListener('keydown', e => {
+  if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && document.activeElement.type !== 'range') return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); return; }
+  const st = sel(); if (!st) return;
+  const step = e.shiftKey ? 1 : 0.2;
+  const moves = {ArrowLeft: ['x', -step], ArrowRight: ['x', step], ArrowUp: ['y', -step], ArrowDown: ['y', step]};
+  if (moves[e.key] && document.activeElement.type !== 'range') {
+    e.preventDefault(); const [k, d] = moves[e.key];
+    st[k] = +Math.max(0, Math.min(100, st[k] + d)).toFixed(2); syncFields([k]); save();
+  } else if (e.key === 'Delete') { removeSel(); }
+});
+
+// ---------- panel de propiedades ----------
+function buildPanel() {
+  let html = '';
+  for (const f of FIELDS) {
+    if (f.section) { html += `<h3>${f.section}</h3>`; continue; }
+    const a = `id="f_${f.k}" data-k="${f.k}"`;
+    if (f.type === 'text') html += `<label class="row col"><span>${f.label}</span><input type="text" ${a}></label>`;
+    else if (f.type === 'textarea') html += `<label class="row col"><span>${f.label}</span><textarea rows="3" ${a}></textarea></label>`;
+    else if (f.type === 'range') html += `<label class="row"><span>${f.label}</span><input type="range" min="${f.min}" max="${f.max}" step="${f.step}" ${a}><output id="o_${f.k}"></output></label>`;
+    else if (f.type === 'color') html += `<label class="row color"><span>${f.label}</span><input type="color" ${a}></label>`;
+    else if (f.type === 'check') html += `<label class="row chk"><input type="checkbox" ${a}><span>${f.label}</span></label>`;
+    else if (f.type === 'select') html += `<label class="row sel2"><span>${f.label}</span><select ${a}>${f.options.map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select></label>`;
+    else if (f.type === 'time') html += `<div class="row time2"><span>${f.label}</span><input type="number" min="0" step="0.1" placeholder="${f.ph}" ${a}><button data-now="${f.k}" title="Usar el tiempo actual del video">Ahora</button></div>`;
+  }
+  $('#props').innerHTML = html;
+}
+function setOut(k) {
+  const f = FIELDS.find(f => f.k === k), st = sel(), o = document.getElementById('o_' + k);
+  if (o && st) o.textContent = (f.step < 1 && f.step >= 0.05 && k === 'lineHeight' ? Number(st[k]).toFixed(2) : Math.round(st[k] * 10) / 10) + (f.unit || '');
+}
+function syncFields(keys) {
+  const st = sel(); if (!st) return;
+  for (const k of keys) {
+    const el = document.getElementById('f_' + k); if (!el) continue;
+    if (el.type === 'checkbox') el.checked = !!st[k];
+    else if (document.activeElement !== el || el.type === 'range') el.value = st[k] ?? '';
+    setOut(k);
+  }
+}
+function fillPanel() {
+  const st = sel();
+  $('#noSel').style.display = st ? 'none' : '';
+  $('#propsWrap').style.display = st ? '' : 'none';
+  if (st) syncFields(FIELDS.filter(f => f.k).map(f => f.k));
+}
+$('#props').addEventListener('input', e => {
+  const el = e.target, k = el.dataset.k, st = sel();
+  if (!k || !st) return;
+  let v;
+  if (el.type === 'checkbox') v = el.checked;
+  else if (el.type === 'range') v = Number(el.value);
+  else if (el.type === 'number') v = el.value === '' ? (k === 'start' ? 0 : '') : Number(el.value);
+  else v = el.value;
+  st[k] = v; setOut(k);
+  if (k === 'question' || k === 'answer' || k === 'start' || k === 'end') renderList();
+  save();
+});
+$('#props').addEventListener('click', e => {
+  const k = e.target.dataset && e.target.dataset.now; const st = sel();
+  if (!k || !st) return;
+  st[k] = +(video.currentTime || 0).toFixed(2); syncFields([k]); renderList(); save();
+});
+
+// ---------- lista ----------
+function selectSticker(id) { selId = id; renderList(); fillPanel(); }
+function renderList() {
+  const el = $('#list');
+  if (!stickers.length) { el.innerHTML = '<div class="empty">Todavía no hay recuadros.</div>'; return; }
+  el.innerHTML = stickers.map((s, i) => {
+    const when = (Number(s.start) || 0) > 0 || s.end !== '' ? ` · ${fmt(s.start)}–${s.end === '' ? 'fin' : fmt(s.end)}` : '';
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+    return `<div class="item ${s.id === selId ? 'sel' : ''}" data-id="${s.id}"><small>#${i + 1} · ${esc(s.question || 'sin pregunta')}${when}</small><div class="txt">${esc(s.answer.replace(/\n/g, ' ')) || '—'}</div></div>`;
+  }).join('');
+}
+$('#list').addEventListener('click', e => {
+  const it = e.target.closest('.item'); if (!it) return;
+  const st = stickers.find(s => s.id === +it.dataset.id);
+  selectSticker(st.id);
+  // Si el recuadro no está visible en este momento, saltar a su inicio.
+  if (hasVideo && !isVisible(st, video.currentTime)) video.currentTime = Number(st.start) || 0;
+});
+
+// ---------- acciones ----------
+$('#add').addEventListener('click', () => {
+  const t = hasVideo ? +(video.currentTime || 0).toFixed(2) : 0;
+  const prev = sel();
+  addSticker({start: t, y: prev ? Math.min(90, prev.y + 18) : 35, x: 50});
+});
+$('#dup').addEventListener('click', () => { const s = sel(); if (s) { const {id, ...rest} = s; addSticker({...rest, y: Math.min(95, s.y + 5)}); } });
+function removeSel() {
+  const i = stickers.findIndex(s => s.id === selId); if (i < 0) return;
+  stickers.splice(i, 1); selectSticker(null); save();
+}
+$('#del').addEventListener('click', removeSel);
+$('#styleAll').addEventListener('click', () => {
+  const s = sel(); if (!s) return;
+  const st = pick(s, STYLE_KEYS);
+  stickers.forEach(o => Object.assign(o, st)); save();
+});
+$('#reset').addEventListener('click', () => { const s = sel(); if (s) { Object.assign(s, IG_STYLE); fillPanel(); save(); } });
+$('#front').addEventListener('click', () => {
+  const i = stickers.findIndex(s => s.id === selId); if (i < 0) return;
+  stickers.push(...stickers.splice(i, 1)); renderList(); save();
+});
+$('#center').addEventListener('click', () => { const s = sel(); if (s) { s.x = 50; syncFields(['x']); save(); } });
+
+function download(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+
+$('#png').addEventListener('click', () => {
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const cx = c.getContext('2d'), t = video.currentTime || 0;
+  for (const st of stickers) if (!hasVideo || isVisible(st, t)) drawSticker(cx, st, W, H, 1);
+  c.toBlob(b => download(b, (hasVideo ? videoName : 'recuadros') + '-recuadros.png'), 'image/png');
+});
+
+// ---------- exportar video ----------
+function pickMime() {
+  const cands = [
+    ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'mp4'],
+    ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'mp4'],
+    ['video/mp4;codecs=avc1,mp4a.40.2', 'mp4'],
+    ['video/mp4', 'mp4'],
+    ['video/webm;codecs=vp9,opus', 'webm'],
+    ['video/webm;codecs=vp8,opus', 'webm'],
+    ['video/webm', 'webm']
+  ];
+  return cands.find(([m]) => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || null;
+}
+let rec = null, cancelled = false;
+$('#export').addEventListener('click', async () => {
+  if (!hasVideo) return alert('Primero subí un video.');
+  const mime = pickMime();
+  if (!mime) return alert('Tu navegador no permite grabar video. Probá con Google Chrome o Edge actualizados.');
+  ensureAudio();
+  video.pause();
+  const prevSel = selId; selId = null; fillPanel(); renderList();
+  exporting = true; cancelled = false;
+  $('#modal').classList.add('show');
+  $('#expInfo').textContent = 'Grabando en ' + mime[1].toUpperCase() + ' — no cambies de pestaña';
+
+  video.currentTime = 0;
+  await new Promise(r => video.addEventListener('seeked', r, {once: true}));
+  await new Promise(r => setTimeout(r, 150));
+
+  const stream = canvas.captureStream(30);
+  if (audioDest) audioDest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+  const px = W * H, bitrate = Math.round(Math.min(16e6, Math.max(6e6, px * 30 * 0.18)));
+  rec = new MediaRecorder(stream, {mimeType: mime[0], videoBitsPerSecond: bitrate, audioBitsPerSecond: 192000});
+  const chunks = [];
+  rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  const done = new Promise(r => rec.onstop = r);
+
+  const tick = setInterval(() => {
+    const p = Math.min(1, video.currentTime / video.duration);
+    $('#expBar').style.width = (p * 100) + '%';
+    $('#expPct').textContent = Math.round(p * 100) + '% · ' + fmt(video.currentTime) + ' / ' + fmt(video.duration);
+  }, 200);
+
+  rec.start(500);
+  video.addEventListener('ended', () => rec.state !== 'inactive' && rec.stop(), {once: true});
+  await video.play();
+  await done;
+  clearInterval(tick);
+  stream.getVideoTracks().forEach(t => t.stop());
+  exporting = false;
+  $('#modal').classList.remove('show');
+  $('#expBar').style.width = '0';
+  $('#play').textContent = '▶';
+  selectSticker(prevSel);
+  if (!cancelled) download(new Blob(chunks, {type: mime[0].split(';')[0]}), videoName + '-con-recuadros.' + mime[1]);
+});
+$('#cancel').addEventListener('click', () => { cancelled = true; video.pause(); if (rec && rec.state !== 'inactive') rec.stop(); });
+
+// ---------- inicio ----------
+buildPanel();
+load();
+renderList(); fillPanel();
+setCanvasSize(1080, 1920);
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
